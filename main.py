@@ -7,17 +7,12 @@ from kivy.graphics import Color, RoundedRectangle, Rectangle
 from kivy.clock import Clock
 from kivy.core.window import Window
 from kivy.animation import Animation
-from kivy.uix.widget import Widget
 from kivy.core.text import LabelBase
-from kivy.uix.image import Image
 from kivy.uix.button import Button
 import random
 
 LabelBase.register(name="Lobster", fn_regular="assets/Lobster-Regular.ttf")
-
-
 Window.fullscreen = 'auto'
-
 Builder.load_file("board.kv")
 
 COLORS = {
@@ -36,7 +31,6 @@ COLORS = {
 
 def get_tile_color(num):
     return COLORS.get(num, "#FFF5CC")
-
 
 class TileWidget(FloatLayout):
     def __init__(self, value, direction=None, **kwargs):
@@ -79,16 +73,22 @@ class TileWidget(FloatLayout):
                Animation(pos_hint={"center_x": 0.5, "center_y": 0.5}, duration=0.1)
         anim.start(self.label)
 
-
 class Board(GridLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.board = [[0] * 4 for _ in range(4)]
         self.score = 0
         self.won = False
+        self.game_over = False
         Clock.schedule_once(self.init_board, 0)
 
     def init_board(self, *args):
+        self.board = [[0]*4 for _ in range(4)]
+        self.score = 0
+        self.won = False
+        self.game_over = False
+        self.ids.game_over_button.opacity = 0
+        self.ids.game_over_button.disabled = True
         self.add_random_tile()
         self.add_random_tile()
         self.update_board()
@@ -121,19 +121,49 @@ class Board(GridLayout):
             self.won = True
             self.show_win_label()
 
+    def can_move(self):
+        for r in range(4):
+            for c in range(4):
+                if self.board[r][c] == 0:
+                    return True
+                if c < 3 and self.board[r][c] == self.board[r][c + 1]:
+                    return True
+                if r < 3 and self.board[r][c] == self.board[r + 1][c]:
+                    return True
+        return False
+
+    def check_game_over(self):
+        if not self.can_move() and not self.won:
+            self.game_over = True
+            self.show_game_over()
+
     def show_win_label(self):
         label = self.ids.win_label
         anim = Animation(opacity=1, duration=3) + Animation(opacity=0, duration=1)
         anim.start(label)
 
+    def show_game_over(self):
+        btn = self.ids.game_over_button
+        btn.disabled = False
+        anim = Animation(opacity=1, duration=1)
+        anim.start(btn)
+
+    def restart_game(self):
+        self.init_board()
+
     def move_left(self):
+        if self.game_over:
+            return
         for r in range(4):
             self.board[r], added = self.merge(self.board[r])
             self.score += added
         self.add_random_tile()
         self.update_board(direction='left')
+        self.check_game_over()
 
     def move_right(self):
+        if self.game_over:
+            return
         for r in range(4):
             reversed_row = list(reversed(self.board[r]))
             merged, added = self.merge(reversed_row)
@@ -141,8 +171,11 @@ class Board(GridLayout):
             self.score += added
         self.add_random_tile()
         self.update_board(direction='right')
+        self.check_game_over()
 
     def move_up(self):
+        if self.game_over:
+            return
         self.board = list(map(list, zip(*self.board)))
         for r in range(4):
             self.board[r], added = self.merge(self.board[r])
@@ -150,8 +183,11 @@ class Board(GridLayout):
         self.board = list(map(list, zip(*self.board)))
         self.add_random_tile()
         self.update_board(direction='up')
+        self.check_game_over()
 
     def move_down(self):
+        if self.game_over:
+            return
         self.board = list(map(list, zip(*self.board)))
         for r in range(4):
             reversed_row = list(reversed(self.board[r]))
@@ -161,6 +197,7 @@ class Board(GridLayout):
         self.board = list(map(list, zip(*self.board)))
         self.add_random_tile()
         self.update_board(direction='down')
+        self.check_game_over()
 
     def merge(self, row):
         new_row = [num for num in row if num != 0]
@@ -182,6 +219,8 @@ class Board(GridLayout):
         return merged_row, score_add
 
     def on_touch_up(self, touch):
+        if self.game_over:
+            return False
         if abs(touch.x - touch.opos[0]) > abs(touch.y - touch.opos[1]):
             if touch.x > touch.opos[0]:
                 self.move_right()
@@ -195,7 +234,6 @@ class Board(GridLayout):
 
     def update_score(self, points):
         self.ids.score_label.text = f"Score : {points}"
-
 
 class StartScreen(FloatLayout):
     def __init__(self, start_callback, **kwargs):
@@ -220,7 +258,6 @@ class StartScreen(FloatLayout):
         self.start_callback()
         return True
 
-
 class Game2048App(App):
     def build(self):
         self.root_widget = FloatLayout()
@@ -235,7 +272,6 @@ class Game2048App(App):
             self.root_widget.clear_widgets()
             self.board = Board()
             self.root_widget.add_widget(self.board)
-
 
 if __name__ == "__main__":
     Game2048App().run()

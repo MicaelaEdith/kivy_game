@@ -33,7 +33,7 @@
     # Botón de salir abajo (en medio)
     BoxLayout:
         size_hint_y: 0.1
-        padding: [dp(10), dp(5), dp(10), dp(10)]  # Reducir margen superior
+        padding: [dp(10), dp(5), dp(10), dp(10)]
         Button:
             text: "X"
             font_name: "Lobster"
@@ -50,7 +50,7 @@
                 RoundedRectangle:
                     pos: self.pos
                     size: self.size
-                    radius: [15]  # Redondear bordes del botón
+                    radius: [15]
 
     # Grid en el medio
     FloatLayout:
@@ -65,6 +65,7 @@
             pos_hint: {"center_x": 0.5, "center_y": 0.5}
             spacing: dp(5)
 
+        # Win label
         Label:
             id: win_label
             text: "[color=#FF80E0]¡[/color][color=#FFB3A2]2[/color][color=#FFC966]0[/color][color=#FFBF80]4[/color][color=#FFA6B3]8[/color][color=#FF80E0]![/color]"
@@ -78,6 +79,32 @@
             canvas.before:
                 Color:
                     rgba: (1, 1, 1, 1)
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [15]
+
+        # Game Over button
+        Button:
+            id: game_over_button
+            text: "[b]Game Over[/b]\nTap to play again"
+            markup: True
+            font_size: '36sp'
+            bold: True
+            size_hint: (0.8, 0.3)
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            opacity: 0
+            disabled: True
+            background_normal: ""
+            background_color: (0.5, 0.5, 0.5, 1)  # gris más claro y semi‑transparente
+            color: (0.85, 0.5, 0.75, 1)               # mismo rosa del fondo
+            text_size: self.size                    # habilita alineación de texto
+            halign: 'center'
+            valign: 'middle'
+            on_release: root.restart_game()
+            canvas.before:
+                Color:
+                    rgba: (0.5, 0.5, 0.5, 0.6)
                 RoundedRectangle:
                     pos: self.pos
                     size: self.size
