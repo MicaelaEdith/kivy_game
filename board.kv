@@ -1,25 +1,27 @@
 <Board>:
-    rows: 2
+    rows: 3
     size_hint: (1, 1)
     padding: dp(10)
     spacing: dp(10)
 
     canvas.before:
         Color:
-            rgba: (0.6, 0.5, 0.75, .95)
+            rgba: (0.85, 0.5, 0.75, .95)
         Rectangle:
             pos: self.pos
             size: self.size
 
+    # Score arriba
     BoxLayout:
         size_hint_y: 0.1
-        padding: dp(10)
+        padding: [dp(10), dp(10), dp(10), dp(0)]
         Label:
             id: score_label
             text: "Score: 0"
-            font_size: '20sp'
+            font_size: '25sp'
+            font_name: "Lobster"
             bold: True
-            color: (0.3, 0.3, 0.5, 1)
+            color: (0.2, 0.2, 0.4, 1)
             canvas.before:
                 Color:
                     rgba: (0.9, 0.95, 1, 1)
@@ -28,8 +30,31 @@
                     size: self.size
                     radius: [10]
 
+    # Botón de salir abajo (en medio)
+    BoxLayout:
+        size_hint_y: 0.1
+        padding: [dp(10), dp(5), dp(10), dp(10)]  # Reducir margen superior
+        Button:
+            text: "X"
+            font_name: "Lobster"
+            size_hint: (None, None)
+            size: (90, 90)
+            background_normal: ""
+            background_color: (1, 0.6, 0.6, 1)
+            color: (0.2, 0.2, 0.2, 1)
+            font_size: 24
+            on_release: root.exit_game()
+            canvas.before:
+                Color:
+                    rgba: (1, 0.6, 0.6, 1)
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [15]  # Redondear bordes del botón
+
+    # Grid en el medio
     FloatLayout:
-        size_hint_y: 0.9
+        size_hint_y: 0.8
 
         GridLayout:
             id: grid
@@ -39,5 +64,21 @@
             height: self.width
             pos_hint: {"center_x": 0.5, "center_y": 0.5}
             spacing: dp(5)
-            
-           
+
+        Label:
+            id: win_label
+            text: "[color=#FF80E0]¡[/color][color=#FFB3A2]2[/color][color=#FFC966]0[/color][color=#FFBF80]4[/color][color=#FFA6B3]8[/color][color=#FF80E0]![/color]"
+            markup: True
+            font_size: '48sp'
+            bold: True
+            size_hint: (0.8, 0.2)
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            color: (0, 0, 0, 1)
+            opacity: 0
+            canvas.before:
+                Color:
+                    rgba: (1, 1, 1, 1)
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [15]
