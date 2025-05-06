@@ -2,6 +2,9 @@
 This is a free and ad-free version of the classic 2048 puzzle game, developed in Python using the Kivy framework. Simple, clean, and lightweight — no trackers, no pop-ups, just pure gameplay.
 Download the .apk and enjoy offline anytime!
 
+👉 https://micaelaedith.itch.io/2048-mobile
+
+
 ![2048](https://github.com/user-attachments/assets/eef24a31-12e7-4c0a-a55c-7c0f0829aa48)
 
 
@@ -11,3 +14,6 @@ You are free to share, modify, and distribute this game, even for commercial pur
 
 Attribution
 Developed by MicaelaEdith
+
+
+
