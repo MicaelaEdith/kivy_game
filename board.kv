@@ -1,0 +1,43 @@
+<Board>:
+    rows: 2
+    size_hint: (1, 1)
+    padding: dp(10)
+    spacing: dp(10)
+
+    canvas.before:
+        Color:
+            rgba: (0.6, 0.5, 0.75, .95)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    BoxLayout:
+        size_hint_y: 0.1
+        padding: dp(10)
+        Label:
+            id: score_label
+            text: "Score: 0"
+            font_size: '20sp'
+            bold: True
+            color: (0.3, 0.3, 0.5, 1)
+            canvas.before:
+                Color:
+                    rgba: (0.9, 0.95, 1, 1)
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [10]
+
+    FloatLayout:
+        size_hint_y: 0.9
+
+        GridLayout:
+            id: grid
+            cols: 4
+            rows: 4
+            size_hint: (0.9, None)
+            height: self.width
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            spacing: dp(5)
+            
+           
