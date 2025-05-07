@@ -33,7 +33,7 @@
     # Botón de salir abajo (en medio)
     BoxLayout:
         size_hint_y: 0.1
-        padding: [dp(10), dp(5), dp(10), dp(10)]
+        padding: [dp(10), dp(0), dp(10), dp(0)]
         Button:
             text: "X"
             font_name: "Lobster"
@@ -42,7 +42,7 @@
             background_normal: ""
             background_color: (1, 0.6, 0.6, 1)
             color: (0.2, 0.2, 0.2, 1)
-            font_size: 24
+            font_size: 42
             on_release: root.exit_game()
             canvas.before:
                 Color:

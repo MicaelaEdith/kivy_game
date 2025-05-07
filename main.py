@@ -14,7 +14,7 @@ import csv
 import os
 
 
-LabelBase.register(name="Lobster", fn_regular="assets/Lobster-Regular.ttf")
+LabelBase.register(name="Lobster", fn_regular="Lobster-Regular.ttf")
 Window.fullscreen = 'auto'
 Builder.load_file("board.kv")
 
@@ -261,7 +261,7 @@ class Board(GridLayout):
                 writer = csv.writer(file)
                 writer.writerow(["high_score", score])
         except Exception as e:
-            print(f"Error saving high score: {e}")
+            print(f"Error saving high score")
 
     def load_high_score(self):
         try:
@@ -274,7 +274,7 @@ class Board(GridLayout):
                     if row[0] == "high_score":
                         return int(row[1])
         except Exception as e:
-            print(f"Error loading high score: {e}")
+            print(f"Error loading high score")
         return 0
 
 
