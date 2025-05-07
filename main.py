@@ -10,6 +10,9 @@ from kivy.animation import Animation
 from kivy.core.text import LabelBase
 from kivy.uix.button import Button
 import random
+import csv
+import os
+
 
 LabelBase.register(name="Lobster", fn_regular="assets/Lobster-Regular.ttf")
 Window.fullscreen = 'auto'
@@ -81,6 +84,12 @@ class Board(GridLayout):
         self.won = False
         self.game_over = False
         Clock.schedule_once(self.init_board, 0)
+        self.board = [[0]*4 for _ in range(4)]
+        self.score = 0
+        self.won = False
+        self.game_over = False
+        self.high_score = self.load_high_score()
+
 
     def init_board(self, *args):
         self.board = [[0]*4 for _ in range(4)]
@@ -234,6 +243,40 @@ class Board(GridLayout):
 
     def update_score(self, points):
         self.ids.score_label.text = f"Score : {points}"
+        if points > self.high_score:
+            self.high_score = points
+            self.save_high_score(points)
+
+    
+    def get_csv_path(self):
+        app = App.get_running_app()
+        #return os.path.join(os.path.dirname(__file__), "highscore.csv") #local Test
+
+        return os.path.join(app.user_data_dir, "highscore.csv")  #android path
+
+    
+    def save_high_score(self, score):
+        try:
+            with open(self.get_csv_path(), mode="w", newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow(["high_score", score])
+        except Exception as e:
+            print(f"Error saving high score: {e}")
+
+    def load_high_score(self):
+        try:
+            path = self.get_csv_path()
+            if not os.path.exists(path):
+                return 0
+            with open(path, mode="r") as file:
+                reader = csv.reader(file)
+                for row in reader:
+                    if row[0] == "high_score":
+                        return int(row[1])
+        except Exception as e:
+            print(f"Error loading high score: {e}")
+        return 0
+
 
 class StartScreen(FloatLayout):
     def __init__(self, start_callback, **kwargs):
@@ -244,6 +287,7 @@ class StartScreen(FloatLayout):
             self.bg = Rectangle(pos=self.pos, size=self.size)
         self.bind(pos=lambda instance, value: setattr(self.bg, 'pos', value))
         self.bind(size=lambda instance, value: setattr(self.bg, 'size', value))
+        self.high_score = self.load_high_score()
 
         self.label = Label(
             text="Tap to Start",
@@ -254,9 +298,40 @@ class StartScreen(FloatLayout):
         )
         self.add_widget(self.label)
 
+        self.label_score = Label(
+            text="High Score: " + str(self.high_score),
+            font_size=80,
+            font_name="Lobster",
+            color=(1.0, 0.92, 0.70, 1),
+            pos_hint={"center_x": 0.5, "center_y": 0.3},
+        )
+        self.add_widget(self.label_score)
+
     def on_touch_down(self, touch):
         self.start_callback()
         return True
+
+    def load_high_score(self):
+        try:
+            path = self.get_csv_path()
+            if not os.path.exists(path):
+                return 0
+            with open(path, mode="r") as file:
+                reader = csv.reader(file)
+                for row in reader:
+                    if row[0] == "high_score":
+                        return int(row[1])
+        except Exception as e:
+            print(f"High score: 0")
+        return 0
+    
+    def get_csv_path(self):
+        app = App.get_running_app()
+        #return os.path.join(os.path.dirname(__file__), "highscore.csv") #local Test
+
+        return os.path.join(app.user_data_dir, "highscore.csv")  #android path
+
+    
 
 class Game2048App(App):
     def build(self):
