@@ -28,8 +28,9 @@ COLORS = {
     128: "#FFB3A2",
     256: "#FFA6B3",
     512: "#FF99C2",
-    1024: "#FF8CD1",
+    1024: "#FF5CD3",
     2048: "#FF80E0",
+    4096: "#FF80E1",
 }
 
 def get_tile_color(num):
@@ -66,10 +67,10 @@ class TileWidget(FloatLayout):
 
     def animate(self, direction):
         dx, dy = {
-            'left': (-3, 0),
-            'right': (3, 0),
-            'up': (0, 3),
-            'down': (0, -3)
+            'left': (3, 0),
+            'right': (-3, 0),
+            'up': (0,-3),
+            'down': (0, 3)
         }.get(direction, (0, 0))
 
         anim = Animation(pos_hint={"center_x": 0.5 + dx/100.0, "center_y": 0.5 + dy/100.0}, duration=0.1) + \
@@ -86,9 +87,11 @@ class Board(GridLayout):
         Clock.schedule_once(self.init_board, 0)
         self.board = [[0]*4 for _ in range(4)]
         self.score = 0
-        self.won = False
         self.game_over = False
         self.high_score = self.load_high_score()
+        self.high_score_flag = False
+        self.last_direction = None
+        self.last_second_direction = None
 
 
     def init_board(self, *args):
@@ -109,10 +112,11 @@ class Board(GridLayout):
         app.in_game = False
 
     def add_random_tile(self):
-        empty_cells = [(r, c) for r in range(4) for c in range(4) if self.board[r][c] == 0]
-        if empty_cells:
-            r, c = random.choice(empty_cells)
-            self.board[r][c] = random.choice([2, 4])
+        if self.last_direction != self.last_second_direction:
+            empty_cells = [(r, c) for r in range(4) for c in range(4) if self.board[r][c] == 0]
+            if empty_cells:
+                r, c = random.choice(empty_cells)
+                self.board[r][c] = random.choice([2, 4])
 
     def update_board(self, direction=None):
         grid = self.ids.grid
@@ -124,6 +128,8 @@ class Board(GridLayout):
                     found_2048 = True
                 tile = TileWidget(value, direction=direction)
                 grid.add_widget(tile)
+        self.last_second_direction = self.last_direction
+        self.last_direction = 'direction'
         self.update_score(self.score)
 
         if found_2048 and not self.won:
@@ -142,12 +148,17 @@ class Board(GridLayout):
         return False
 
     def check_game_over(self):
-        if not self.can_move() and not self.won:
+        if not self.can_move():
             self.game_over = True
             self.show_game_over()
 
     def show_win_label(self):
         label = self.ids.win_label
+        anim = Animation(opacity=1, duration=3) + Animation(opacity=0, duration=1)
+        anim.start(label)
+
+    def show_new_record(self):
+        label = self.ids.record_label
         anim = Animation(opacity=1, duration=3) + Animation(opacity=0, duration=1)
         anim.start(label)
 
@@ -158,6 +169,7 @@ class Board(GridLayout):
         anim.start(btn)
 
     def restart_game(self):
+        self.high_score_flag = False
         self.init_board()
 
     def move_left(self):
@@ -232,13 +244,17 @@ class Board(GridLayout):
             return False
         if abs(touch.x - touch.opos[0]) > abs(touch.y - touch.opos[1]):
             if touch.x > touch.opos[0]:
+                self.last_direction = 'right'
                 self.move_right()
             else:
+                self.last_direction = 'left'
                 self.move_left()
         else:
             if touch.y > touch.opos[1]:
+                self.last_direction = 'up'
                 self.move_up()
             else:
+                self.last_direction = 'down'
                 self.move_down()
 
     def update_score(self, points):
@@ -246,6 +262,9 @@ class Board(GridLayout):
         if points > self.high_score:
             self.high_score = points
             self.save_high_score(points)
+            if not self.high_score_flag:
+                self.show_new_record()
+                self.high_score_flag = True
 
     
     def get_csv_path(self):
@@ -291,10 +310,10 @@ class StartScreen(FloatLayout):
 
         self.label = Label(
             text="Tap to Start",
-            font_size=80,
+            font_size=95,
             font_name="Lobster",
             color=(1.0, 0.92, 0.70, 1),
-            pos_hint={"center_x": 0.5, "center_y": 0.5},
+            pos_hint={"center_x": 0.5, "center_y": 0.7},
         )
         self.add_widget(self.label)
 
@@ -303,7 +322,7 @@ class StartScreen(FloatLayout):
             font_size=80,
             font_name="Lobster",
             color=(1.0, 0.92, 0.70, 1),
-            pos_hint={"center_x": 0.5, "center_y": 0.3},
+            pos_hint={"center_x": 0.5, "center_y": 0.4},
         )
         self.add_widget(self.label_score)
 
